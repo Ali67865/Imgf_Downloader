@@ -12,9 +12,9 @@ def get_absolute_filename(folderpath, name):
     return filename
 
 
-def parse_instapaper_html(name: str):
+def parse_instapaper_html(folderpath, name: str):
     link_list = []
-    fullpath = get_absolute_filename(name)
+    fullpath = get_absolute_filename(folderpath, name)
     soup = bs4.BeautifulSoup(open(fullpath), 'html.parser')
     for item in soup.findAll('a', href=True):
         # print(item.get('href'))
@@ -38,10 +38,10 @@ def filter_non_relevant_addresses(link_list):
 
 def main():
     folderpath = ''
-    if sys.platfrom == 'posix':
+    if sys.platform == 'linux':
         folderpath = '/mnt/ELEMENTS/completed'
     elif sys.platform == 'darwin':
-        folderpath = '/Users/alidimanche/Downloads'
+        folderpath = '/Volumes/completed/'
     else:
         print('Unable to determine OS. Quitting.')
         return

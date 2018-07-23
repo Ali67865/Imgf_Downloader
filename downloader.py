@@ -8,7 +8,7 @@ import progressbar
 
 def check_or_create_folder(folderpath, gallery_name):
     gallery_name = re.sub('[^a-zA-Z0-9 ()]', '', gallery_name)
-    full_path = os.path.abspath(os.path.join(folderpath, '/Imagefap_Downloads', gallery_name))
+    full_path = os.path.abspath(os.path.join(folderpath, 'Imagefap_Downloads', gallery_name))
     if not os.path.exists(full_path) or not os.path.isdir(full_path):
         # print('Creating new directory {}'.format(full_path))
         os.mkdir(full_path)
