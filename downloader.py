@@ -6,15 +6,14 @@ import re
 import progressbar
 
 
-def remove_non_ascii(text):
-    return ''.join([i if ((122 >= ord(i) >= 65) or (48 <= ord(i) <= 57)) else ' ' for i in text])
-
-
-def check_or_create_folder(gallery_name):
-    full_path = os.path.abspath(os.path.join('/Volumes/completed/Imagefap_Downloads', remove_non_ascii(gallery_name)))
+def check_or_create_folder(folderpath, gallery_name):
+    gallery_name = re.sub('[^a-zA-Z0-9 ()]', '', gallery_name)
+    full_path = os.path.abspath(os.path.join(folderpath, '/Imagefap_Downloads', gallery_name))
     if not os.path.exists(full_path) or not os.path.isdir(full_path):
         # print('Creating new directory {}'.format(full_path))
         os.mkdir(full_path)
+    else:
+        return ''
     return full_path
 
 
@@ -31,7 +30,7 @@ def get_gallery_name(url):
                 title = tag.parent.contents[3].contents[0].contents[0]
     except Exception as e:
         title = url.split("/")[4]
-    return remove_non_ascii(title)
+    return title
 
 
 def get_html(url):
@@ -143,12 +142,12 @@ def download_image_from_single_page(image_page_url, folder_full_path):
 
 
 def download_image_from_pages(image_url_list, folder_full_path):
-    # pbar = progressbar.ProgressBar(widgets=[progressbar.Percentage(), progressbar.Bar()], maxval=image_url_list.__len__() + 1).start()
-    # i = 1
+    #pbar = progressbar.ProgressBar(widgets=[progressbar.Percentage(), progressbar.Bar()], maxval=image_url_list.__len__() + 1).start()
+    #i = 1
     for image_page_url in image_url_list:
         download_image_from_single_page(image_page_url, folder_full_path)
     #    pbar.update(i + 1)
-    # pbar.finish()
+    #pbar.finish()
     return
 
 
@@ -161,7 +160,7 @@ def gallery_still_exists(url):
         return True
 
 
-def downloader_main(url):
+def downloader_main(folderpath, url):
     if not gallery_still_exists(url):
         print("gallery no longer exists, skipping")
         return -1
@@ -170,7 +169,10 @@ def downloader_main(url):
     if "There seems to be an issue with the gallery, skipping" in gallery_name:
         print(gallery_name)
         return -1
-    folder_full_path = check_or_create_folder(gallery_name)
+    folder_full_path = check_or_create_folder(folderpath, gallery_name)
+    if folder_full_path == '':
+        print('folder {} already present, skipping....'.format(gallery_name))
+        return -1
     gallery_home_url = get_gallery_home(url)
     if "Could not find gallery home" in gallery_home_url:
         print(gallery_home_url)

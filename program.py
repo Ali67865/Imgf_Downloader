@@ -3,11 +3,12 @@ import os
 import bs4
 import random
 import time
+import sys
 import progressbar
 
 
-def get_absolute_filename(name):
-    filename = os.path.abspath(os.path.join('/Users/alidimanche/Downloads', name + '.html'))
+def get_absolute_filename(folderpath, name):
+    filename = os.path.abspath(os.path.join(folderpath, name + '.html'))
     return filename
 
 
@@ -27,7 +28,7 @@ def filter_non_relevant_addresses(link_list):
     for entry in link_list:
         entry_string = str(entry)
         # if entry_string.contains('https://www.literotica.com/s/'):
-        if ('http://www.imagefap.com/photo/' in entry_string):
+        if ('imagefap.com/photo' in entry_string):
             new_list.append(entry)
         else:
             discarded_list.append(entry)
@@ -36,25 +37,34 @@ def filter_non_relevant_addresses(link_list):
 
 
 def main():
-    link_list = parse_instapaper_html('test_TOR_export')
+    folderpath = ''
+    if sys.platfrom == 'posix':
+        folderpath = '/mnt/ELEMENTS/completed'
+    elif sys.platform == 'darwin':
+        folderpath = '/Users/alidimanche/Downloads'
+    else:
+        print('Unable to determine OS. Quitting.')
+        return
+    link_list = parse_instapaper_html(folderpath, 'tor')
     parsed_list = filter_non_relevant_addresses(link_list)
+    parsed_list = sorted(parsed_list)
+    parsed_list = list(set(parsed_list))
     total = parsed_list.__len__()
-    pbar = progressbar.ProgressBar(widgets=[progressbar.Percentage(), progressbar.Bar()], maxval=total + 1).start()
-    i = 270
+    #pbar = progressbar.ProgressBar(widgets=[progressbar.Percentage(), progressbar.Bar()], maxval=total + 1).start()
+    i = 0
     for url in parsed_list[i:]:
         print('downloading gallery {} of {} = ({})'.format(i, total, url))
-        retvalue = downloader.downloader_main(url)
+        retvalue = downloader.downloader_main(folderpath, url)
         if retvalue == 0:
-            r = random.randrange(10, 30)
+            r = random.randrange(5, 15)
             print('done, sleeping ({})...'.format(r))
             time_delay = r
             time.sleep(time_delay)
         else:
             print('skipped, moving on...')
         i = i + 1
-        time.sleep(0.01)
-        pbar.update(i)
-    pbar.finish()
+        #pbar.update(i)
+    #pbar.finish()
 
 
 if __name__ == '__main__':
